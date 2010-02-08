@@ -38,6 +38,13 @@ class ProvenanceSetup(object):
         """
         self._pfiles.append(filename)
 
+    def getFiles(self):
+        """
+        return the list of production policy filenames that will get
+        recorded.  
+        """
+        return list(self._pfiles)
+
     def addProductionRecorder(self, recorder):
         """
         register the desire to receive production-level provenance by 
@@ -73,6 +80,8 @@ class ProvenanceSetup(object):
         """
         if args is None:
             args = []
+        elif not isinstance(args, list):
+            raise TypeError("addWorkflowRecordCmd: args: not a list")
         self._cmdTmpls.append( (cmd, list(args), path) )
 
     def getRecorders(self):
