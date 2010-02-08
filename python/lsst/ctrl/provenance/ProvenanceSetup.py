@@ -125,7 +125,7 @@ class ProvenanceSetup(object):
           3. join and execute the command word list.
         """
         out = []
-        foreach cmd in self._cmdTmpls:
+        for cmd in self._cmdTmpls:
             cl = [cmd[0]]
             cl.extend(cmd[1])
             out.append(cl)

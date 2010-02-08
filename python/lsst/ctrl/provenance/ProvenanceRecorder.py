@@ -1,5 +1,5 @@
 from lsst.pex.policy import Policy
-from lsst.pex.log import Log
+from lsst.pex.logging import Log
 
 class ProvenanceRecorder(object):
     """
@@ -38,5 +38,5 @@ class ProvenanceRecorder(object):
         """
         msg = 'called "abstract" Provenance.record'
         if self._logger:
-            self._logger.log(Log.FAIL, msg)
+            self._logger.log(Log.FATAL, msg)
         raise RuntimeError(msg)
