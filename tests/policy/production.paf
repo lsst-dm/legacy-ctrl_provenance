@@ -1,0 +1,40 @@
+#<?cfg paf policy ?>
+#
+# Orchestration Layer Policy
+#
+
+eventBrokerHost:     lsst8.ncsa.uiuc.edu
+repositoryDirectory: $CTRL_DC3PIPE_DIR/pipeline
+shutdownTopic:       alertProductionShutdown
+
+database: {
+    shortName: dc3aGlobal
+    system: @lsst10-mysql.paf
+    configuration: @database/dc3a.paf
+}
+
+workflow: {
+    shortName: IPSD
+    platform: @platform/abecluster.paf
+
+    pipeline: {
+        shortName: IPSD
+        definition: @IPSD.paf
+        deploy: {
+            cores: 64
+            processesOnNode: 9
+            processesOnNode: 8
+        }
+        launch: true
+    }
+    pipeline: {
+        shortName: mops
+        definition: @mops.paf
+        deploy: {
+            cores: 5
+            processesOnNode: 5
+        }
+        launch: true
+    }
+}
+

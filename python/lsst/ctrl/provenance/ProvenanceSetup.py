@@ -1,4 +1,8 @@
+import os, sys
+
 from lsst.pex.policy import Policy
+from lsst.pex.logging import Log
+from lsst.pex.exceptions import LsstCppException
 from ProvenanceRecorder import ProvenanceRecorder
 
 class ProvenanceSetup(object):
@@ -37,6 +41,43 @@ class ProvenanceSetup(object):
         @param filename   the full path to the policy file
         """
         self._pfiles.append(filename)
+
+    def addAllProductionPolicies(self, filename, repository=".", 
+                                 pipefile="workflow.pipeline.definition",
+                                 logger=None):
+        """
+        add for recording the given production policy file along with all
+        of the production policy files referred to inside.  
+
+        After adding filename via addProductionPolicy(), it is opened 
+        recursively to find all filenames mentioned via the policy 
+        file include mechanism, which are also added (uniquely) to the 
+        list.  Pipeline definition policy files (identified by pipefile)
+        are not added.
+
+        @param filename    the production policy file.  This is assumed to 
+                              be a production-level policy file.  If it is
+                              not, pipefile should be set accordingly.  This
+                              filename should give the complete path to the
+                              file.
+        @param repository  the assumed policy repository directory where 
+                              included policy files are to be found.  When
+                              an include file is found, its name will be 
+                              prepended with this path before being added.
+        @param pipefile    the hierarchical policy name for a pipeline 
+                              definition.  Any included policy filenames at 
+                              this node or lower will not be added.
+        @param logger      if provided, use this Log to record any
+                              warnings about missing or bad files;
+                              otherwise, problems are silently ignored.
+        """
+        filenames = ProvenanceSetup.extractIncludedFilenames(filename,
+                                                             repository,
+                                                             pipefile,
+                                                             logger)
+        self.addProductionPolicy(filename)
+        for file in filenames:
+            self.addProductionPolicy(os.path.join(repository,file))
 
     def getFiles(self):
         """
@@ -140,3 +181,139 @@ class ProvenanceSetup(object):
             out.append(cl)
         return out
 
+
+
+    @staticmethod
+    def extractIncludedFilenames(prodPolicyFile, repository=".", 
+                                 pipefile=None, logger=None):
+        """
+        extract all the filenames included, directly or indirectly, from the 
+        given policy file.  When a repository is provided, included files will
+        be recursively opened and searched.  The paths in the returned set
+        will not include the repository directory.  Use pipefile to skip 
+        the inclusion of pipeline policy files.
+
+        @param prodPolicyFile   the policy file to examine.  This must
+                                  be the full path to the file
+        @param repository       the policy repository.  If None, the current
+                                   directory is assumed.
+        @param pipefile         the hierarchical policy name for a pipeline 
+                                   definition.  Any included policy filenames 
+                                   at this node or lower will not be added.
+        @param logger           if provided, use this Log to record any
+                                   warnings about missing or bad files;
+                                   otherwise, problems are silently ignored.
+        @return set   containing the unique set of policy filenames found,
+                        including the given top file and the 
+        """
+        prodPolicy = Policy.createPolicy(prodPolicyFile, False)
+        filenames = set([prodPolicyFile])
+        ProvenanceSetup._listFilenames(filenames, prodPolicy, None, repository,
+                                       pipefile, logger)
+        filenames.discard(prodPolicyFile)
+        return filenames
+
+    @staticmethod
+    def _listFilenames(fileset, policy, basename, repository, stopname=None,
+                       logger=None):
+        if stopname and basename and not stopname.startswith(basename):
+            stopname = None
+        for name in policy.names(True):
+            fullname = basename and ".".join([basename, name]) or name
+            if stopname and fullname == stopname:
+                continue
+            
+            if policy.isFile(name):
+                files = policy.getArray(name)
+                for file in files:
+                    file = file.getPath()
+                    if file not in fileset:
+                        fileset.add(file);
+                        file = os.path.join(repository, file)
+                        if not os.path.exists(file):
+                            if logger:
+                                logger.log(logger.WARN, "Policy file not found in repository: %s" % file)
+                                continue
+                        try:
+                            if logger and logger.sends(Log.DEBUG):
+                                logger.log(Log.DEBUG, "opening log file: %s"%file)
+                            fpolicy = Policy.createPolicy(file, False)
+                            ProvenanceSetup._listFilenames(fileset, fpolicy, 
+                                                           fullname,repository,
+                                                           stopname, logger)
+                        except LsstCppException, ex:
+                            if logger:
+                                logger.log(Log.WARN, "problem loading %s: %s" % (file, str(ex)) )
+                            continue
+                        
+            elif policy.isPolicy(name):
+                pols = policy.getArray(name)
+                for pol in pols:
+                    ProvenanceSetup._listFilenames(fileset, pol, fullname,
+                                                   repository, stopname,logger)
+
+    @staticmethod
+    def extractPipelineFilenames(wfname, prodPolicyFile, repository=".",
+                                 logger=None):
+        """
+        extract all non-pipeline policy files in the given production
+        policy file.
+        @param wfname           the name of the workflow of interest
+        @param prodPolicyFile   the production-level policy file
+        @param repository       the policy repository
+        @param logger           if provided, use this Log to record any
+                                   warnings about missing or bad files;
+                                   otherwise, problems are silently ignored.
+        """
+        prodPolicy = Policy.createPolicy(prodPolicyFile, False)
+
+        out = []
+        wfs = ProvenanceSetup._shallowPolicyNodeResolve("workflow", prodPolicy,
+                                                        repository, logger)
+        if not wfs:
+            return out
+        for wfp in wfs:
+            if wfp is None:
+                continue
+            if not wfp.exists("shortName") or wfp.get("shortName") != wfname:
+                continue
+
+            pipes = ProvenanceSetup._shallowPolicyNodeResolve("pipeline",
+                                                              wfp, repository)
+            for pipe in pipes:
+                if not pipe.exists("definition") or not pipe.isFile("definition"):
+                    continue
+                pipe = pipe.get("definition").getPath()
+                out.append(pipe)
+                pipe = os.path.join(repository, pipe)
+                if not os.path.exists(pipe):
+                    if logger:
+                        logger.log(Log.WARN,"Policy file not found in repository: "+pipe)
+                    continue
+                out += list(ProvenanceSetup.extractIncludedFilenames(pipe,
+                                                                   repository))
+
+        return out
+
+    @staticmethod
+    def _shallowPolicyNodeResolve(pname, policy, repository, logger=None):
+        if not policy.exists(pname):
+            return []
+
+        nodes = policy.getArray(pname)
+        if policy.isFile(pname):
+            for i in xrange(len(nodes)):
+                try:
+                    if not os.path.isabs(nodes[i]):
+                        nodes[i] = os.path.join(repository, nodes[i])
+                    nodes[i] = Policy.createPolicy(nodes[i], False)
+                except LsstCppException, ex:
+                    if logger:
+                        logger.log(Log.WARN, "problem finding/loading "+nodes[i])
+                    nodes[i] = None
+
+        return nodes
+        
+                
+
+    

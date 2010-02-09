@@ -14,6 +14,8 @@ from lsst.ctrl.provenance import ProvenanceSetup
 
 logger = Log(Log.getDefaultLog(), "tester")
 logger.setThreshold(Log.FATAL+10)
+repos = os.path.join(os.environ['CTRL_PROVENANCE_DIR'], "tests", "policy")
+prodPolicyFile = os.path.join(repos, "production.paf")
 
 class GoodRecorder(ProvenanceRecorder):
     def __init__(self, testcase, logger=None):
@@ -62,7 +64,22 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         self.assertEquals(files[0], "goober.paf")
         self.assertEquals(files[1], "hank.paf")
 
-        
+    def testAddAllFiles(self):
+        # see FindFilesTestCase for test of underlying function
+        self.assertEquals(len(self.setup.getFiles()), 0)
+        self.setup.addAllProductionPolicies(prodPolicyFile, repos)
+        files = self.setup.getFiles()
+        self.assertEquals(len(files), 4)
+
+        find = [prodPolicyFile] + map(lambda f: os.path.join(repos,f),
+          "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split())
+        for file in find:
+            self.assert_(file in files, "Failed to file file: "+file)
+
+        self.setup.addProductionRecorder(self.rec)
+        self.assertEquals(self.recorded, 0)
+        self.setup.recordProduction()
+        self.assertEquals(self.recorded, 4)
 
     def testRecord(self):
         self.setup.addProductionPolicy("hank.paf")
@@ -107,8 +124,50 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         self.assertEquals(cmds[1][2], "ray")
         self.assertEquals(paths[1], "/usr/local/bin/dbingest.py")
         
-        
+class FindFilesTestCase(unittest.TestCase):
 
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        pass
+
+    def testExtractProdFiles(self):
+        files = set(ProvenanceSetup.extractIncludedFilenames(prodPolicyFile,
+                                                             repos,
+                                      pipefile="workflow.pipeline.definition"))
+
+        find = "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()
+        self.assertEquals(len(files), len(find))
+
+        for file in find:
+            self.assert_(file in files, "Failed to file file: "+file)
+    
+    def testExtractProdFiles2(self):
+        files = set(ProvenanceSetup.extractIncludedFilenames(prodPolicyFile,
+                                                             repos))
+                                                             
+        find = "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()
+        find += "mops.paf IPSD.paf".split()
+        find += "IPSD/01-sliceInfo_policy.paf IPSD/02-symLink_policy-abe.paf IPSD/03-imageInput0_policy.paf IPSD/12-isr0_policy.paf IPSD/14-calibAndBkgdExposureOutput_policy.paf".split()
+        
+        self.assertEquals(len(files), len(find))
+
+        for file in find:
+            self.assert_(file in files, "Failed to file file: "+file)
+
+    def testExtractPipeFiles(self):
+        files = set(ProvenanceSetup.extractPipelineFilenames("IPSD",
+                                                             prodPolicyFile,
+                                                             repos))
+        find = "mops.paf IPSD.paf".split()
+        find += "IPSD/01-sliceInfo_policy.paf IPSD/02-symLink_policy-abe.paf IPSD/03-imageInput0_policy.paf IPSD/12-isr0_policy.paf IPSD/14-calibAndBkgdExposureOutput_policy.paf".split()
+        self.assertEquals(len(files), len(find))
+
+        for file in find:
+            self.assert_(file in files, "Failed to file file: "+file)
+
+        
     
 __all__ = "ProvenanceSetupTestCase".split()        
 
