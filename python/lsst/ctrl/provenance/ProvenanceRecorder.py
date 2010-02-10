@@ -31,6 +31,13 @@ class ProvenanceRecorder(object):
         if not fromSub:
             raise RuntimeError("Attempt to instantiate abstract class, " +
                                "ProvenanceRecorder; see class docs")
+
+    def recordEnv(self):
+        """
+        Record the software and/or hardware environment.
+        """
+        self._logger.log(Log.DEBUG, 
+                         "no implementation for recording environment")
         
     def record(self, filename):
         """
