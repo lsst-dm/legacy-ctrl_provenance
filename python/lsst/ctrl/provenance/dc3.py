@@ -13,7 +13,7 @@ from lsst.daf.base import DateTime
 runid_incr = 8172
 activ_incr =  128
 
-def _offsetToActivityId(runidx, actividx):
+def _offsetToActivityId(runidx, activeidx):
     return runidx * runid_incr + activeidx * activ_incr
 
 class Recorder(ProvenanceRecorder):
@@ -63,7 +63,7 @@ class Recorder(ProvenanceRecorder):
         """
 
         ProvenanceRecorder.__init__(self, logger, True)
-        self._runid = runid
+        self._runid = runId
         self._activName = activityName
         self._platName = platform
 
@@ -75,11 +75,11 @@ class Recorder(ProvenanceRecorder):
 
         self._rundb = DbStorage()
         self._rundb.setPersistLocation(LogicalLocation(dbLoc))
-        self._globalLoc = LogicalLocation(globalLoc)
-        self._globaldb = DbStorage()
-        self._globaldb.setPersistLocation(globalLoc)
+        self._globalLoc = LogicalLocation(globalDbLoc)
+        self._globalDb = DbStorage()
+        self._globalDb.setPersistLocation(self._globalLoc)
 
-        self.intialize()
+        self.initialize()
 
     def recordEnv(self):
         """
@@ -114,7 +114,7 @@ class Recorder(ProvenanceRecorder):
         isOrch = self._roffset is None
         if isOrch:
             acttype = "launch"
-            self.initProdRun(self)
+            self.initProdRun()
         else:
             acttype = "workflow"
 
@@ -130,7 +130,7 @@ class Recorder(ProvenanceRecorder):
         self._globalDb.startTransaction()
         self._globalDb.setTableForQuery("prv_Run")
         self._globalDb.outColumn("offset")
-        self._globalDb.condParamString("runId", runId)
+        self._globalDb.condParamString("runId", self._runid)
         self._globalDb.setQueryWhere("runId = :runId")
         self._globalDb.query()
         if not self._globalDb.next() or self._globalDb.columnIsNull(0):
@@ -151,11 +151,11 @@ class Recorder(ProvenanceRecorder):
         if self._roffset is not None:
             raise lsst.pex.exceptions.LsstException("runId appears to already be registered")
 
-        self._globaldb.setPersistLocation(self._globalLoc)
+        self._globalDb.setPersistLocation(self._globalLoc)
 
         self._globalDb.startTransaction()
         self._globalDb.setTableForInsert("prv_Run")
-        self._globalDb.setColumnString("runId", runId)
+        self._globalDb.setColumnString("runId", self._runid)
         self._globalDb.insertRow()
         self._globalDb.endTransaction()
 
@@ -177,8 +177,8 @@ class Recorder(ProvenanceRecorder):
         activityId = _offsetToActivityId(self._roffset, self._aoffset)
 
         self._globalDb.startTransaction()
-        self._globalDb.setTableForInsert("prv_Run")
-        self._globalDb.setColumnInt("activityId", runId)
+        self._globalDb.setTableForInsert("prv_Activity")
+        self._globalDb.setColumnInt("activityId", activityId)
         self._globalDb.setColumnString("type", typen)
         self._globalDb.setColumnString("name", name)
         self._globalDb.setColumnString("platform", platform)

@@ -34,15 +34,16 @@ class ProvenanceSetup(object):
         # the list of command line templates
         self._cmdTmpls = []
 
-    def addProductionPolicy(self, filename):
+    def addProductionPolicyFile(self, filename):
         """
         add a policy file to record via the interested PolicyRecorders.
         Typically, the file will contain production-level policy data.
         @param filename   the full path to the policy file
         """
+        print "adding ProductionPolicyFile = ",filename
         self._pfiles.append(filename)
 
-    def addAllProductionPolicies(self, filename, repository=".", 
+    def addAllProductionPolicyFiles(self, filename, repository=".", 
                                  pipefile="workflow.pipeline.definition",
                                  logger=None):
         """
@@ -140,6 +141,8 @@ class ProvenanceSetup(object):
         """
         for consumer in self._consumers:
             for file in self._pfiles:
+                print "self._pfiles = ",self._pfiles
+                print "file =",file
                 consumer.record(file)
 
     
@@ -225,6 +228,8 @@ class ProvenanceSetup(object):
             
             if policy.isFile(name):
                 files = policy.getArray(name)
+                print "_listFilesnames: name = ",name
+                print "_listFilesnames: files = ",files
                 for file in files:
                     file = file.getPath()
                     if file not in fileset:
