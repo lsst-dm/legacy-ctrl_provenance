@@ -76,9 +76,9 @@ class ProvenanceSetup(object):
                                                              repository,
                                                              pipefile,
                                                              logger)
-        self.addProductionPolicy(filename)
+        self.addProductionPolicyFile(filename)
         for file in filenames:
-            self.addProductionPolicy(os.path.join(repository,file))
+            self.addProductionPolicyFile(os.path.join(repository,file))
 
     def getFiles(self):
         """
