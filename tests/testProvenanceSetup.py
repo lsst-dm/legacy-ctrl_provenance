@@ -48,7 +48,7 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         files = self.setup.getFiles()
         self.assertEquals(len(files), 0)
 
-        self.setup.addProductionPolicy("goober.paf")
+        self.setup.addProductionPolicyFile("goober.paf")
         files = self.setup.getFiles()
         self.assertEquals(len(files), 1)
         self.assertEquals(files[0], "goober.paf")
@@ -58,7 +58,7 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         self.assertEquals(len(files), 1)
         self.assertEquals(files[0], "goober.paf")
 
-        self.setup.addProductionPolicy("hank.paf")
+        self.setup.addProductionPolicyFile("hank.paf")
         files = self.setup.getFiles()
         self.assertEquals(len(files), 2)
         self.assertEquals(files[0], "goober.paf")
@@ -67,7 +67,7 @@ class ProvenanceSetupTestCase(unittest.TestCase):
     def testAddAllFiles(self):
         # see FindFilesTestCase for test of underlying function
         self.assertEquals(len(self.setup.getFiles()), 0)
-        self.setup.addAllProductionPolicies(prodPolicyFile, repos)
+        self.setup.addAllProductionPolicyFiles(prodPolicyFile, repos)
         files = self.setup.getFiles()
         self.assertEquals(len(files), 4)
 
@@ -82,7 +82,7 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         self.assertEquals(self.recorded, 4)
 
     def testRecord(self):
-        self.setup.addProductionPolicy("hank.paf")
+        self.setup.addProductionPolicyFile("hank.paf")
         self.setup.addProductionRecorder(self.rec)
         self.assertEquals(len(self.setup.getRecorders()), 1)
 
@@ -114,6 +114,10 @@ class ProvenanceSetupTestCase(unittest.TestCase):
                                         "/usr/local/bin/dbingest.py")
         cmds = self.setup.getCmds()
         paths = self.setup.getCmdPaths()
+        print "======================================="
+        print cmds
+        print paths
+        print "======================================="
         self.assertEquals(len(cmds), 2)
         self.assertEquals(len(paths), 2)
         self.assertEquals(cmds[0][0], "recProv.py")

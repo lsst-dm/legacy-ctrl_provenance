@@ -40,7 +40,6 @@ class ProvenanceSetup(object):
         Typically, the file will contain production-level policy data.
         @param filename   the full path to the policy file
         """
-        print "adding ProductionPolicyFile = ",filename
         self._pfiles.append(filename)
 
     def addAllProductionPolicyFiles(self, filename, repository=".", 
@@ -141,8 +140,6 @@ class ProvenanceSetup(object):
         """
         for consumer in self._consumers:
             for file in self._pfiles:
-                print "self._pfiles = ",self._pfiles
-                print "file =",file
                 consumer.record(file)
 
     
@@ -228,12 +225,10 @@ class ProvenanceSetup(object):
             
             if policy.isFile(name):
                 files = policy.getArray(name)
-                print "_listFilesnames: name = ",name
-                print "_listFilesnames: files = ",files
                 for file in files:
                     file = file.getPath()
                     if file not in fileset:
-                        fileset.add(file);
+                        fileset.add(file)
                         file = os.path.join(repository, file)
                         if not os.path.exists(file):
                             if logger:
@@ -299,6 +294,30 @@ class ProvenanceSetup(object):
                                                                    repository))
 
         return out
+
+    @staticmethod
+    def extractSinglePipelineFileNames(pipe, repository=".", logger=None):
+        """
+        extract all pipeline policy files in the given pipeline policy
+        @param pipe             the pipeline of interest
+        @param repository       the policy repository
+        @param logger           if provided, use this Log to record any
+                                   warnings about missing or bad files;
+                                   otherwise, problems are silently ignored.
+        """
+        out = []
+        if not pipe.exists("definition") or not pipe.isFile("definition"):
+                return
+        pipe = pipe.get("definition").getPath()
+        out.append(pipe)
+        pipe = os.path.join(repository, pipe)
+        if not os.path.exists(pipe):
+            if logger:
+                logger.log(Log.WARN,"Policy file not found in repository: "+pipe)
+            return
+        out += list(ProvenanceSetup.extractIncludedFilenames(pipe, repository))
+        return out
+
 
     @staticmethod
     def _shallowPolicyNodeResolve(pname, policy, repository, logger=None):
