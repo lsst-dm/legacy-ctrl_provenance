@@ -192,8 +192,8 @@ class Recorder(ProvenanceRecorder):
         """Record the software environment of the pipeline."""
         
         setupList = eups.Eups().listProducts(setup=True)
-        self._realRecordEnvironment(self.db, setupList)
-        self._realRecordEnvironment(self.globalDb, setupList)
+        self._realRecordEnvironment(self._rundb, setupList)
+        self._realRecordEnvironment(self._globalDb, setupList)
 
     def _realRecordEnvironment(self, db, setupList):
         db.startTransaction()
@@ -224,16 +224,16 @@ class Recorder(ProvenanceRecorder):
             md5.update(line)
         f.close()
 
-        self._realRecordPolicyFile(self.db, policyFile, md5)
-        self._realRecordPolicyFile(self.globalDb, policyFile, md5)
+        self._realRecordPolicyFile(self._rundb, policyFile, md5)
+        self._realRecordPolicyFile(self._globalDb, policyFile, md5)
 
         p = Policy.createPolicy(policyFile, False)
         for key in p.paramNames():
             type = p.getTypeName(key)
             val = p.str(key) # works for arrays, too
             val = re.sub(r'\0', r'', val) # extra nulls get included
-            self._realRecordPolicyContents(self.db, key, type, val)
-            self._realRecordPolicyContents(self.globalDb, key, type, val)
+            self._realRecordPolicyContents(self._rundb, key, type, val)
+            self._realRecordPolicyContents(self._globalDb, key, type, val)
 
             self._policyKeyId += 1
 
@@ -243,7 +243,7 @@ class Recorder(ProvenanceRecorder):
         db.startTransaction()
 
         db.setTableForInsert("prv_PolicyFile")
-        db.setColumnInt("policyFileId", self.policyFileId)
+        db.setColumnInt("policyFileId", self._policyFileId)
         db.setColumnString("pathname", file)
         db.setColumnString("hashValue", md5.hexdigest())
         db.setColumnInt64("modifiedDate",
@@ -255,14 +255,14 @@ class Recorder(ProvenanceRecorder):
     def _realRecordPolicyContents(self, db, key, type, val):
         db.startTransaction()
         db.setTableForInsert("prv_PolicyKey")
-        db.setColumnInt("policyKeyId", self.policyKeyId)
-        db.setColumnInt("policyFileId", self.policyFileId)
+        db.setColumnInt("policyKeyId", self._policyKeyId)
+        db.setColumnInt("policyFileId", self._policyFileId)
         db.setColumnString("keyName", key)
         db.setColumnString("keyType", type)
         db.insertRow()
 
         db.setTableForInsert("prv_cnf_PolicyKey")
-        db.setColumnInt("policyKeyId", self.policyKeyId)
+        db.setColumnInt("policyKeyId", self._policyKeyId)
         db.setColumnString("value", val)
         db.insertRow()
 
