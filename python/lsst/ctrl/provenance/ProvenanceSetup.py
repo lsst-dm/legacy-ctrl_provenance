@@ -141,6 +141,7 @@ class ProvenanceSetup(object):
         for consumer in self._consumers:
             for file in self._pfiles:
                 consumer.record(file)
+            consumer.recordEnv()
 
     
     def getCmdPaths(self):
