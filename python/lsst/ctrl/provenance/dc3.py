@@ -10,8 +10,8 @@ from lsst.pex.policy import Policy
 from lsst.daf.persistence import DbStorage, LogicalLocation
 from lsst.daf.base import DateTime
 
-runid_incr = 8172
-activ_incr =  128
+runid_incr = 2097152
+activ_incr =  512
 
 def _offsetToActivityId(runidx, activeidx):
     return runidx * runid_incr + activeidx * activ_incr
