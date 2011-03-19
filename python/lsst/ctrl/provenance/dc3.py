@@ -200,7 +200,7 @@ class Recorder(ProvenanceRecorder):
 
         self._globalDb.startTransaction()
         self._globalDb.setTableForInsert("prv_Activity")
-        self._globalDb.setColumnInt("activityId", activityId)
+        self._globalDb.setColumnInt64("activityId", activityId)
         self._globalDb.setColumnString("type", typen)
         self._globalDb.setColumnString("name", name)
         self._globalDb.setColumnString("platform", platform)
