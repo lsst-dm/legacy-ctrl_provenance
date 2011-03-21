@@ -265,7 +265,7 @@ class Recorder(ProvenanceRecorder):
         db.startTransaction()
 
         db.setTableForInsert("prv_PolicyFile")
-        db.setColumnInt("policyFileId", self._policyFileId)
+        db.setColumnInt64("policyFileId", self._policyFileId)
         db.setColumnString("pathname", file)
         db.setColumnString("hashValue", md5.hexdigest())
         db.setColumnInt64("modifiedDate",
@@ -277,14 +277,14 @@ class Recorder(ProvenanceRecorder):
     def _realRecordPolicyContents(self, db, key, type, val):
         db.startTransaction()
         db.setTableForInsert("prv_PolicyKey")
-        db.setColumnInt("policyKeyId", self._policyKeyId)
-        db.setColumnInt("policyFileId", self._policyFileId)
+        db.setColumnInt64("policyKeyId", self._policyKeyId)
+        db.setColumnInt64("policyFileId", self._policyFileId)
         db.setColumnString("keyName", key)
         db.setColumnString("keyType", type)
         db.insertRow()
 
         db.setTableForInsert("prv_cnf_PolicyKey")
-        db.setColumnInt("policyKeyId", self._policyKeyId)
+        db.setColumnInt64("policyKeyId", self._policyKeyId)
         db.setColumnString("value", val)
         db.insertRow()
 
