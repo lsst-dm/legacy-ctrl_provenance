@@ -223,12 +223,12 @@ class Recorder(ProvenanceRecorder):
         id = _offsetToActivityId(self._roffset, self._aoffset) + 1
         for pkg, ver, eupsDb, productDir, isCurrent, isSetup in setupList:
             db.setTableForInsert("prv_SoftwarePackage")
-            db.setColumnInt("packageId", id)
+            db.setColumnInt64("packageId", id)
             db.setColumnString("packageName", pkg)
             db.insertRow()
 
             db.setTableForInsert("prv_cnf_SoftwarePackage")
-            db.setColumnInt("packageId", id)
+            db.setColumnInt64("packageId", id)
             db.setColumnString("version", ver)
             db.setColumnString("directory", productDir)
             db.insertRow() 
