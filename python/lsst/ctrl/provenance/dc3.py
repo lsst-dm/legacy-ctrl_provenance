@@ -214,7 +214,7 @@ class Recorder(ProvenanceRecorder):
         """Record the software environment of the pipeline."""
         
         setupList = eups.Eups().listProducts(setup=True)
-        self._realRecordEnvironment(self._rundb, setupList)
+        # self._realRecordEnvironment(self._rundb, setupList)
         self._realRecordEnvironment(self._globalDb, setupList)
 
     def _realRecordEnvironment(self, db, setupList):
@@ -246,7 +246,7 @@ class Recorder(ProvenanceRecorder):
             md5.update(line)
         f.close()
 
-        self._realRecordPolicyFile(self._rundb, policyFile, md5)
+        # self._realRecordPolicyFile(self._rundb, policyFile, md5)
         self._realRecordPolicyFile(self._globalDb, policyFile, md5)
 
         p = Policy.createPolicy(policyFile, False)
@@ -254,7 +254,7 @@ class Recorder(ProvenanceRecorder):
             type = p.getTypeName(key)
             val = p.str(key) # works for arrays, too
             val = re.sub(r'\0', r'', val) # extra nulls get included
-            self._realRecordPolicyContents(self._rundb, key, type, val)
+            # self._realRecordPolicyContents(self._rundb, key, type, val)
             self._realRecordPolicyContents(self._globalDb, key, type, val)
 
             self._policyKeyId += 1
