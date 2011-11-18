@@ -1,6 +1,6 @@
-setupRequired(cat >= 3.1)
-setupRequired(pex_policy >= 3.4)
-setupRequired(pex_logging >= 3.3.4)
+setupRequired(cat >= 4.6.0.0)
+setupRequired(pex_policy >= 4.6.0.0)
+setupRequired(pex_logging >= 4.6.0.0)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
 envPrepend(PATH, ${PRODUCT_DIR}/bin)
