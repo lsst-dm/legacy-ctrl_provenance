@@ -24,7 +24,7 @@ import os, sys
 
 from lsst.pex.policy import Policy
 from lsst.pex.logging import Log
-from lsst.pex.exceptions import LsstCppException
+import lsst.pex.exceptions
 from ProvenanceRecorder import ProvenanceRecorder
 
 class ProvenanceSetup(object):
@@ -264,7 +264,7 @@ class ProvenanceSetup(object):
                             ProvenanceSetup._listFilenames(fileset, fpolicy, 
                                                            fullname,repository,
                                                            stopname, logger)
-                        except LsstCppException, ex:
+                        except lsst.pex.exceptions.Exception as ex:
                             if logger:
                                 logger.log(Log.WARN, "problem loading %s: %s" % (file, str(ex)) )
                             continue
@@ -354,7 +354,7 @@ class ProvenanceSetup(object):
                     if not os.path.isabs(nodes[i]):
                         nodes[i] = os.path.join(repository, nodes[i])
                     nodes[i] = Policy.createPolicy(nodes[i], False)
-                except LsstCppException, ex:
+                except lsst.pex.exceptions.Exception as ex:
                     if logger:
                         logger.log(Log.WARN, "problem finding/loading "+nodes[i])
                     nodes[i] = None
