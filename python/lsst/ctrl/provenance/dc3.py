@@ -171,7 +171,7 @@ class Recorder(ProvenanceRecorder):
         run offset to this run.  
         """
         if self._roffset is not None:
-            raise lsst.pex.exceptions.LsstException("runId appears to already be registered")
+            raise lsst.pex.exceptions.Exception("runId appears to already be registered")
 
         self._globalDb.setPersistLocation(self._globalLoc)
 
@@ -185,16 +185,16 @@ class Recorder(ProvenanceRecorder):
         if self._roffset is None:
             msg = "failed to register runid"
             self._logger.log(Log.WARN+5, msg)
-            raise pex.exceptions.LsstException(msg)
+            raise pex.exceptions.Exception(msg)
 
     def initActivity(self, name, typen, platform):
         """
         register an activity (workflow, or other operation on a platform).
         """
         if self._roffset is None:
-            raise lsst.pex.exceptions.LsstException("Unknown runid index (offset)")
+            raise lsst.pex.exceptions.Exception("Unknown runid index (offset)")
         if self._aoffset is None:
-            raise lsst.pex.exceptions.LsstException("Unknown activity index")
+            raise lsst.pex.exceptions.Exception("Unknown activity index")
 
         activityId = _offsetToActivityId(self._roffset, self._aoffset)
 
