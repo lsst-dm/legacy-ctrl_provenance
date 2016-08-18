@@ -1,6 +1,7 @@
 setupRequired(cat)
 setupRequired(pex_policy)
 setupRequired(pex_logging)
+setupRequired(python_future)
 
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
 envPrepend(PATH, ${PRODUCT_DIR}/bin)
