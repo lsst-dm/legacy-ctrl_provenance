@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,18 +9,19 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-import os, sys
+import os
+import sys
 
 from lsst.ctrl.provenance import ProvenanceRecorder
 import eups
@@ -33,10 +34,12 @@ from lsst.daf.persistence import DbStorage, LogicalLocation
 from lsst.daf.base import DateTime
 
 runid_incr = 2097152
-activ_incr =  512
+activ_incr = 512
+
 
 def _offsetToActivityId(runidx, activeidx):
     return runidx * runid_incr + activeidx * activ_incr
+
 
 class Recorder(ProvenanceRecorder):
     """
@@ -47,7 +50,7 @@ class Recorder(ProvenanceRecorder):
     and must have permission to write to the database.
     """
 
-    def __init__(self, runId, activityName, platform, dbLoc, globalDbLoc, 
+    def __init__(self, runId, activityName, platform, dbLoc, globalDbLoc,
                  activOffset=0, runOffset=None, logger=None):
         """
         Initialize a ProvenanceRecorder.  
@@ -90,10 +93,10 @@ class Recorder(ProvenanceRecorder):
         self._platName = platform
 
         # the index for the this production run
-        self._roffset = runOffset;
+        self._roffset = runOffset
 
         # the index for this activity (launch process or workflow)
-        self._aoffset = activOffset;
+        self._aoffset = activOffset
 
         self._rundb = DbStorage()
         self._rundb.setPersistLocation(LogicalLocation(dbLoc))
@@ -164,7 +167,6 @@ class Recorder(ProvenanceRecorder):
         self._globalDb.setPersistLocation(self._globalLoc)
         return roffset
 
-
     def initProdRun(self):
         """
         register the production run via its runid.  This will assign a
@@ -212,14 +214,14 @@ class Recorder(ProvenanceRecorder):
 
     def recordEnvironment(self):
         """Record the software environment of the pipeline."""
-        
+
         setupList = eups.Eups().listProducts(setup=True)
         # self._realRecordEnvironment(self._rundb, setupList)
         self._realRecordEnvironment(self._globalDb, setupList)
 
     def _realRecordEnvironment(self, db, setupList):
         db.startTransaction()
-        
+
         id = _offsetToActivityId(self._roffset, self._aoffset) + 1
         for product in setupList:
             db.setTableForInsert("prv_SoftwarePackage")
@@ -231,7 +233,7 @@ class Recorder(ProvenanceRecorder):
             db.setColumnInt64("packageId", id)
             db.setColumnString("version", product.version)
             db.setColumnString("directory", product.dir)
-            db.insertRow() 
+            db.insertRow()
 
             id += 1
 
@@ -252,8 +254,8 @@ class Recorder(ProvenanceRecorder):
         p = Policy.createPolicy(policyFile, False)
         for key in p.paramNames():
             type = p.getTypeName(key)
-            val = p.str(key) # works for arrays, too
-            val = re.sub(r'\0', r'', val) # extra nulls get included
+            val = p.str(key)  # works for arrays, too
+            val = re.sub(r'\0', r'', val)  # extra nulls get included
             # self._realRecordPolicyContents(self._rundb, key, type, val)
             self._realRecordPolicyContents(self._globalDb, key, type, val)
 
@@ -269,7 +271,7 @@ class Recorder(ProvenanceRecorder):
         db.setColumnString("pathname", file)
         db.setColumnString("hashValue", md5.hexdigest())
         db.setColumnInt64("modifiedDate",
-                DateTime(os.stat(file)[8] * 1000000000L, DateTime.UTC).nsecs())
+                          DateTime(os.stat(file)[8] * 1000000000L, DateTime.UTC).nsecs())
         db.insertRow()
 
         db.endTransaction()
