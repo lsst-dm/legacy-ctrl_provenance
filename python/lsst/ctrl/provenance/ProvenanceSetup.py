@@ -1,4 +1,7 @@
 from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from builtins import object
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -179,7 +182,7 @@ class ProvenanceSetup(object):
         returned by getCmds().  If an element is non-None, then the
         script should be copied to the remote workflow platform.  
         """
-        return map(lambda s: s[2], self._cmdTmpls)
+        return [s[2] for s in self._cmdTmpls]
 
     def getCmds(self):
         """
@@ -348,7 +351,7 @@ class ProvenanceSetup(object):
 
         nodes = policy.getArray(pname)
         if policy.isFile(pname):
-            for i in xrange(len(nodes)):
+            for i in range(len(nodes)):
                 try:
                     if not os.path.isabs(nodes[i]):
                         nodes[i] = os.path.join(repository, nodes[i])

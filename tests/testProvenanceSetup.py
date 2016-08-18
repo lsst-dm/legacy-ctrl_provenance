@@ -98,8 +98,8 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         files = self.setup.getFiles()
         self.assertEquals(len(files), 4)
 
-        find = [prodPolicyFile] + map(lambda f: os.path.join(repos, f),
-                                      "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split())
+        find = [prodPolicyFile] + [os.path.join(repos, f)
+                for f in "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()]
         for file in find:
             self.assert_(file in files, "Failed to file file: "+file)
 
