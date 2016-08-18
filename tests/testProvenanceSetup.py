@@ -29,6 +29,8 @@ from __future__ import print_function
 import os
 import unittest
 
+import lsst.utils.tests
+
 from lsst.pex.logging import Log
 from lsst.ctrl.provenance import ProvenanceRecorder
 from lsst.ctrl.provenance import ProvenanceSetup
@@ -210,7 +212,14 @@ class FindFilesTestCase(unittest.TestCase):
             self.assert_(file in files, "Failed to file file: "+file)
 
 
-__all__ = "ProvenanceSetupTestCase".split()
+class MemoryTester(lsst.utils.tests.MemoryTestCase):
+    pass
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
+
 
 if __name__ == "__main__":
+    lsst.utils.tests.init()
     unittest.main()

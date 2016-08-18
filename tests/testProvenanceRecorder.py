@@ -27,6 +27,7 @@ Tests of the ProvenanceRecorder
 """
 import unittest
 
+import lsst.utils.tests
 from lsst.pex.logging import Log
 from lsst.ctrl.provenance import ProvenanceRecorder
 
@@ -65,7 +66,15 @@ class GoodRecorder(ProvenanceRecorder):
         self.tester.assert_(len(filename) > 0, "empty filename found")
         self._logger.log(Log.INFO, "recording "+filename)
 
-__all__ = "ProvenanceRecorderTestCase".split()
+
+class MemoryTester(lsst.utils.tests.MemoryTestCase):
+    pass
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
+
 
 if __name__ == "__main__":
+    lsst.utils.tests.init()
     unittest.main()
