@@ -26,11 +26,8 @@
 Tests of the ProvenanceRecorder
 """
 from __future__ import print_function
-import pdb                              # we may want to say pdb.set_trace()
 import os
-import sys
 import unittest
-import time
 
 from lsst.pex.logging import Log
 from lsst.ctrl.provenance import ProvenanceRecorder
@@ -62,7 +59,8 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         self.recorded = 0
 
     def tearDown(self):
-        pass
+        del self.setup
+        del self.rec
 
     def testProdRecorder(self):
         recs = self.setup.getRecorders()
@@ -98,8 +96,8 @@ class ProvenanceSetupTestCase(unittest.TestCase):
         files = self.setup.getFiles()
         self.assertEquals(len(files), 4)
 
-        find = [prodPolicyFile] + [os.path.join(repos, f)
-                for f in "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()]
+        fileNameList = "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()
+        find = [prodPolicyFile] + [os.path.join(repos, f) for f in fileNameList]
         for file in find:
             self.assert_(file in files, "Failed to file file: "+file)
 
@@ -176,24 +174,36 @@ class FindFilesTestCase(unittest.TestCase):
             self.assert_(file in files, "Failed to file file: "+file)
 
     def testExtractProdFiles2(self):
-        files = set(ProvenanceSetup.extractIncludedFilenames(prodPolicyFile,
-                                                             repos))
+        files = set(ProvenanceSetup.extractIncludedFilenames(prodPolicyFile, repos))
 
-        find = "lsst10-mysql.paf database/dc3a.paf platform/abecluster.paf".split()
-        find += "mops.paf IPSD.paf".split()
-        find += "IPSD/01-sliceInfo_policy.paf IPSD/02-symLink_policy-abe.paf IPSD/03-imageInput0_policy.paf IPSD/12-isr0_policy.paf IPSD/14-calibAndBkgdExposureOutput_policy.paf".split()
-
+        find = [
+            "lsst10-mysql.paf",
+            "database/dc3a.paf",
+            "platform/abecluster.paf",
+            "mops.paf",
+            "IPSD.paf",
+            "IPSD/01-sliceInfo_policy.paf",
+            "IPSD/02-symLink_policy-abe.paf",
+            "IPSD/03-imageInput0_policy.paf",
+            "IPSD/12-isr0_policy.paf",
+            "IPSD/14-calibAndBkgdExposureOutput_policy.paf",
+        ]
         self.assertEquals(len(files), len(find))
 
         for file in find:
             self.assert_(file in files, "Failed to file file: "+file)
 
     def testExtractPipeFiles(self):
-        files = set(ProvenanceSetup.extractPipelineFilenames("IPSD",
-                                                             prodPolicyFile,
-                                                             repos))
-        find = "mops.paf IPSD.paf".split()
-        find += "IPSD/01-sliceInfo_policy.paf IPSD/02-symLink_policy-abe.paf IPSD/03-imageInput0_policy.paf IPSD/12-isr0_policy.paf IPSD/14-calibAndBkgdExposureOutput_policy.paf".split()
+        files = set(ProvenanceSetup.extractPipelineFilenames("IPSD", prodPolicyFile, repos))
+        find = [
+            "mops.paf",
+            "IPSD.paf",
+            "IPSD/01-sliceInfo_policy.paf",
+            "IPSD/02-symLink_policy-abe.paf",
+            "IPSD/03-imageInput0_policy.paf",
+            "IPSD/12-isr0_policy.paf",
+            "IPSD/14-calibAndBkgdExposureOutput_policy.paf",
+        ]
         self.assertEquals(len(files), len(find))
 
         for file in find:

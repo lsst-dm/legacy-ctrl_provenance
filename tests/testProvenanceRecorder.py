@@ -25,23 +25,13 @@
 """
 Tests of the ProvenanceRecorder
 """
-import pdb                              # we may want to say pdb.set_trace()
-import os
-import sys
 import unittest
-import time
 
 from lsst.pex.logging import Log
 from lsst.ctrl.provenance import ProvenanceRecorder
 
 
 class ProvenanceRecorderTestCase(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
     def testBadInit(self):
         self.assertRaises(RuntimeError, ProvenanceRecorder)
