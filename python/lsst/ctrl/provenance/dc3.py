@@ -158,7 +158,7 @@ class Recorder(ProvenanceRecorder):
         self._globalDb.condParamString("runId", self._runid)
         self._globalDb.setQueryWhere("runId = :runId")
         self._globalDb.query()
-        if not self._globalDb.next() or self._globalDb.columnIsNull(0):
+        if not next(self._globalDb) or self._globalDb.columnIsNull(0):
             return None
         roffset = self._globalDb.getColumnByPosInt(0)
         self._globalDb.finishQuery()
@@ -271,7 +271,7 @@ class Recorder(ProvenanceRecorder):
         db.setColumnString("pathname", file)
         db.setColumnString("hashValue", md5.hexdigest())
         db.setColumnInt64("modifiedDate",
-                          DateTime(os.stat(file)[8] * 1000000000L, DateTime.UTC).nsecs())
+                          DateTime(os.stat(file)[8] * 1000000000, DateTime.UTC).nsecs())
         db.insertRow()
 
         db.endTransaction()

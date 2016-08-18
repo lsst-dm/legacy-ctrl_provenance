@@ -25,6 +25,7 @@
 """
 Tests of the ProvenanceRecorder
 """
+from __future__ import print_function
 import pdb                              # we may want to say pdb.set_trace()
 import os
 import sys
@@ -140,10 +141,10 @@ class ProvenanceSetupTestCase(unittest.TestCase):
                                         "/usr/local/bin/dbingest.py")
         cmds = self.setup.getCmds()
         paths = self.setup.getCmdPaths()
-        print "======================================="
-        print cmds
-        print paths
-        print "======================================="
+        print("=======================================")
+        print(cmds)
+        print(paths)
+        print("=======================================")
         self.assertEquals(len(cmds), 2)
         self.assertEquals(len(paths), 2)
         self.assertEquals(cmds[0][0], "recProv.py")

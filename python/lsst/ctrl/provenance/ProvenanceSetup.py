@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -26,7 +27,7 @@ import sys
 from lsst.pex.policy import Policy
 from lsst.pex.logging import Log
 import lsst.pex.exceptions
-from ProvenanceRecorder import ProvenanceRecorder
+from .ProvenanceRecorder import ProvenanceRecorder
 
 
 class ProvenanceSetup(object):
