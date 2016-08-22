@@ -132,20 +132,26 @@ class ProvenanceSetup(object):
         register the desire to receive workflow-level provenance by
         providing shell-executable command to record that
         provenance. The expectation is that this command will be
-        executed on the remove execution platform when the workflow is
-        launched. The cmd argument must not include any path as part of
+        executed on the remote execution platform when the workflow is
+        launched, and further, if the path is specified, it may be used to
+        copy the command at that location to the remote execution platform.
+        (Whether it does copy the command is up to the caller of this code).
+        The cmd argument must not include any path as part of
         its name. The command must accept one or more arguments (after
         the provided args) representing filenames of policies to
-        record.
+        record. Note that if the path is specified, this method does
+        not attempt to verify that the path to the executable exists.
         @param cmd    the name of the command (without arguments) to
                         execute.
         @param args   the arguments to pass to the command (prior to
                         the list of policy files)
         @param path   the path to the executable on the launch
-                        platform.  This path allows the executable to
-                        be copied over to the execution platform where
-                        the workflow will run.  The basename is not
-                        required to be the same as given in cmd.
+                        platform. This path can later be used to 
+                        have the executable copied over to the
+                        execution platform where the workflow
+                        will run.  The basename is not required
+                        to be the same as given in cmd. This path
+                        is not verified to exist by this method.
         """
         if args is None:
             args = []
