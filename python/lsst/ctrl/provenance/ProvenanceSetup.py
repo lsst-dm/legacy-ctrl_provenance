@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from builtins import str
-from builtins import range
-from builtins import object
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -23,8 +19,13 @@ from builtins import object
 # the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
+from __future__ import absolute_import
 
 import os
+
+from builtins import str
+from builtins import range
+from builtins import object
 
 from lsst.pex.policy import Policy
 from lsst.pex.logging import Log

@@ -30,7 +30,6 @@ import os
 import unittest
 
 import lsst.utils.tests
-
 from lsst.pex.logging import Log
 from lsst.ctrl.provenance import ProvenanceRecorder
 from lsst.ctrl.provenance import ProvenanceSetup

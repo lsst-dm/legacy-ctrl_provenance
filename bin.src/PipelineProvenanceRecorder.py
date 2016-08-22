@@ -1,4 +1,3 @@
-from builtins import range
 #!/usr/bin/env python
 
 #
@@ -23,11 +22,12 @@ from builtins import range
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-import lsst.ctrl.provenance.dc3 as dc3
-
 import os.path
 import optparse
 
+from builtins import range
+
+import lsst.ctrl.provenance.dc3 as dc3
 from lsst.ctrl.provenance.ProvenanceSetup import ProvenanceSetup
 from lsst.pex.logging import Log
 
