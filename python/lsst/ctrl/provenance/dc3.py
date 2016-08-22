@@ -159,7 +159,7 @@ class Recorder(ProvenanceRecorder):
         self._globalDb.condParamString("runId", self._runid)
         self._globalDb.setQueryWhere("runId = :runId")
         self._globalDb.query()
-        if not next(self._globalDb) or self._globalDb.columnIsNull(0):
+        if not self._globalDb.next() or self._globalDb.columnIsNull(0):
             return None
         roffset = self._globalDb.getColumnByPosInt(0)
         self._globalDb.finishQuery()
