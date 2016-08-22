@@ -1,4 +1,3 @@
-from builtins import next
 #
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
@@ -22,15 +21,14 @@ from builtins import next
 #
 
 import os
-import sys
 
 from lsst.ctrl.provenance import ProvenanceRecorder
 import eups
 import hashlib
-import os
 import re
 import lsst.pex.exceptions
 from lsst.pex.policy import Policy
+from lsst.pex.logging import Log
 from lsst.daf.persistence import DbStorage, LogicalLocation
 from lsst.daf.base import DateTime
 
@@ -54,36 +52,36 @@ class Recorder(ProvenanceRecorder):
     def __init__(self, runId, activityName, platform, dbLoc, globalDbLoc,
                  activOffset=0, runOffset=None, logger=None):
         """
-        Initialize a ProvenanceRecorder.  
+        Initialize a ProvenanceRecorder.
         @param runId            the unique production run ID
-        @param activityName     a name for the activity that provenance is 
+        @param activityName     a name for the activity that provenance is
                                   being recorded for.  On the launch platform
                                   this should be the name of the production
                                   run (not the runid).  On a workflow platform
                                   (where pipelines are run), this should be
-                                  the name of the workflow.  
-        @param platform         a logical name for the platform where this 
+                                  the name of the workflow.
+        @param platform         a logical name for the platform where this
                                   class has been instantiated.  This is not
-                                  typically a DNS name, but it can be.  This 
+                                  typically a DNS name, but it can be.  This
                                   is usually the name from the platform policy.
         @param dbLoc            the URL representing the production run-
                                   specific database
         @param globalLoc        the URL representing the global database
-                                  shared by all production runs.  
+                                  shared by all production runs.
         @param activOffset      the integer ID assigned to the current workflow
                                   by the orchestration layer which is unique
-                                  to the runid.  On the launch platform, this 
+                                  to the runid.  On the launch platform, this
                                   should be zero.  On the workflow platforms,
-                                  this is n for nth workflow listed in the 
+                                  this is n for nth workflow listed in the
                                   production run policy file.
         @param runOffset        the integer ID assigned to this run (runId)
-                                  by the database.  This should be None 
+                                  by the database.  This should be None
                                   when instantiating from the launch platform.
                                   In this case, the run will be initialized
                                   to assign the runOffset (which can later
                                   be retrieved via getRunOffset()).  On
-                                  workflow platforms the runOffset must be 
-                                  provided properly associate workflow 
+                                  workflow platforms the runOffset must be
+                                  provided properly associate workflow
                                   provenance with the right production run.
         @param logger           a Log instance to use for messages
         """
@@ -110,8 +108,8 @@ class Recorder(ProvenanceRecorder):
     def recordEnv(self):
         """
         an implementation of the ProvenanceRecorder API that records details
-        about the environment (software, hardware, etc) where the current 
-        activity is running.  
+        about the environment (software, hardware, etc) where the current
+        activity is running.
         """
         self.recordEnvironment()
 
@@ -126,16 +124,16 @@ class Recorder(ProvenanceRecorder):
         """
         return the index offset for this run (as identified by its runid)
         that was assigned by the database.  None is returned if it has not
-        yet been assigned.  
+        yet been assigned.
         """
         return self._roffset
 
     def initialize(self):
         """
-        add data to the provenance database that identifies this run (if 
+        add data to the provenance database that identifies this run (if
         necessary) and activity.  In particular, this will assign
         the runId's index offset (which can be retrieved afterward via
-        getRunOffset()).  
+        getRunOffset()).
         """
         isOrch = self._roffset is None
         if isOrch:
@@ -149,7 +147,7 @@ class Recorder(ProvenanceRecorder):
     def queryRunOffset(self):
         """
         query the database to get the run offset for the current runid.
-        None is returned if the runid has not been registered, yet.  
+        None is returned if the runid has not been registered, yet.
         """
         self._globalDb.setRetrieveLocation(self._globalLoc)
 
@@ -171,7 +169,7 @@ class Recorder(ProvenanceRecorder):
     def initProdRun(self):
         """
         register the production run via its runid.  This will assign a
-        run offset to this run.  
+        run offset to this run.
         """
         if self._roffset is not None:
             raise lsst.pex.exceptions.Exception("runId appears to already be registered")
@@ -188,7 +186,7 @@ class Recorder(ProvenanceRecorder):
         if self._roffset is None:
             msg = "failed to register runid"
             self._logger.log(Log.WARN+5, msg)
-            raise pex.exceptions.Exception(msg)
+            raise lsst.pex.exceptions.Exception(msg)
 
     def initActivity(self, name, typen, platform):
         """

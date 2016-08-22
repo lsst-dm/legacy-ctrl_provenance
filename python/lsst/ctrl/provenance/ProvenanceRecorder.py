@@ -21,7 +21,6 @@ from builtins import object
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-from lsst.pex.policy import Policy
 from lsst.pex.logging import Log
 
 
@@ -31,14 +30,14 @@ class ProvenanceRecorder(object):
     provenance into a particular database.  A provenance consumer
     instance (usually a DatabaseConfigurator, from ctrl.orca) will
     instantiate a subclass that is wired for that particular
-    provenance store. 
+    provenance store.
     """
 
     def __init__(self, logger=None, fromSub=False):
         """
         As this class is abstract, it should only be executed from a
         subclass's constructor, in which case fromSub should be set to
-        True.  
+        True.
         @param logger    a logger to use for messages.  This will be
                             passed to each recorder.  If null, a
                             logger will be created as needed.
