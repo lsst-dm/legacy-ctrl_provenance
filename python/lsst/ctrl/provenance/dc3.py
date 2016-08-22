@@ -1,7 +1,7 @@
-# 
+#
 # LSST Data Management System
 # Copyright 2008, 2009, 2010 LSST Corporation.
-# 
+#
 # This product includes software developed by the
 # LSST Project (http://www.lsst.org/).
 #
@@ -9,34 +9,36 @@
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
-# You should have received a copy of the LSST License Statement and 
-# the GNU General Public License along with this program.  If not, 
+#
+# You should have received a copy of the LSST License Statement and
+# the GNU General Public License along with this program.  If not,
 # see <http://www.lsstcorp.org/LegalNotices/>.
 #
 
-import os, sys
+import os
 
 from lsst.ctrl.provenance import ProvenanceRecorder
 import eups
 import hashlib
-import os
 import re
 import lsst.pex.exceptions
 from lsst.pex.policy import Policy
+from lsst.pex.logging import Log
 from lsst.daf.persistence import DbStorage, LogicalLocation
 from lsst.daf.base import DateTime
 
 runid_incr = 2097152
-activ_incr =  512
+activ_incr = 512
+
 
 def _offsetToActivityId(runidx, activeidx):
     return runidx * runid_incr + activeidx * activ_incr
+
 
 class Recorder(ProvenanceRecorder):
     """
@@ -47,39 +49,39 @@ class Recorder(ProvenanceRecorder):
     and must have permission to write to the database.
     """
 
-    def __init__(self, runId, activityName, platform, dbLoc, globalDbLoc, 
+    def __init__(self, runId, activityName, platform, dbLoc, globalDbLoc,
                  activOffset=0, runOffset=None, logger=None):
         """
-        Initialize a ProvenanceRecorder.  
+        Initialize a ProvenanceRecorder.
         @param runId            the unique production run ID
-        @param activityName     a name for the activity that provenance is 
+        @param activityName     a name for the activity that provenance is
                                   being recorded for.  On the launch platform
                                   this should be the name of the production
                                   run (not the runid).  On a workflow platform
                                   (where pipelines are run), this should be
-                                  the name of the workflow.  
-        @param platform         a logical name for the platform where this 
+                                  the name of the workflow.
+        @param platform         a logical name for the platform where this
                                   class has been instantiated.  This is not
-                                  typically a DNS name, but it can be.  This 
+                                  typically a DNS name, but it can be.  This
                                   is usually the name from the platform policy.
         @param dbLoc            the URL representing the production run-
                                   specific database
         @param globalLoc        the URL representing the global database
-                                  shared by all production runs.  
+                                  shared by all production runs.
         @param activOffset      the integer ID assigned to the current workflow
                                   by the orchestration layer which is unique
-                                  to the runid.  On the launch platform, this 
+                                  to the runid.  On the launch platform, this
                                   should be zero.  On the workflow platforms,
-                                  this is n for nth workflow listed in the 
+                                  this is n for nth workflow listed in the
                                   production run policy file.
         @param runOffset        the integer ID assigned to this run (runId)
-                                  by the database.  This should be None 
+                                  by the database.  This should be None
                                   when instantiating from the launch platform.
                                   In this case, the run will be initialized
                                   to assign the runOffset (which can later
                                   be retrieved via getRunOffset()).  On
-                                  workflow platforms the runOffset must be 
-                                  provided properly associate workflow 
+                                  workflow platforms the runOffset must be
+                                  provided properly associate workflow
                                   provenance with the right production run.
         @param logger           a Log instance to use for messages
         """
@@ -90,10 +92,10 @@ class Recorder(ProvenanceRecorder):
         self._platName = platform
 
         # the index for the this production run
-        self._roffset = runOffset;
+        self._roffset = runOffset
 
         # the index for this activity (launch process or workflow)
-        self._aoffset = activOffset;
+        self._aoffset = activOffset
 
         self._rundb = DbStorage()
         self._rundb.setPersistLocation(LogicalLocation(dbLoc))
@@ -106,8 +108,8 @@ class Recorder(ProvenanceRecorder):
     def recordEnv(self):
         """
         an implementation of the ProvenanceRecorder API that records details
-        about the environment (software, hardware, etc) where the current 
-        activity is running.  
+        about the environment (software, hardware, etc) where the current
+        activity is running.
         """
         self.recordEnvironment()
 
@@ -122,16 +124,16 @@ class Recorder(ProvenanceRecorder):
         """
         return the index offset for this run (as identified by its runid)
         that was assigned by the database.  None is returned if it has not
-        yet been assigned.  
+        yet been assigned.
         """
         return self._roffset
 
     def initialize(self):
         """
-        add data to the provenance database that identifies this run (if 
+        add data to the provenance database that identifies this run (if
         necessary) and activity.  In particular, this will assign
         the runId's index offset (which can be retrieved afterward via
-        getRunOffset()).  
+        getRunOffset()).
         """
         isOrch = self._roffset is None
         if isOrch:
@@ -145,7 +147,7 @@ class Recorder(ProvenanceRecorder):
     def queryRunOffset(self):
         """
         query the database to get the run offset for the current runid.
-        None is returned if the runid has not been registered, yet.  
+        None is returned if the runid has not been registered, yet.
         """
         self._globalDb.setRetrieveLocation(self._globalLoc)
 
@@ -164,11 +166,10 @@ class Recorder(ProvenanceRecorder):
         self._globalDb.setPersistLocation(self._globalLoc)
         return roffset
 
-
     def initProdRun(self):
         """
         register the production run via its runid.  This will assign a
-        run offset to this run.  
+        run offset to this run.
         """
         if self._roffset is not None:
             raise lsst.pex.exceptions.Exception("runId appears to already be registered")
@@ -185,7 +186,7 @@ class Recorder(ProvenanceRecorder):
         if self._roffset is None:
             msg = "failed to register runid"
             self._logger.log(Log.WARN+5, msg)
-            raise pex.exceptions.Exception(msg)
+            raise lsst.pex.exceptions.Exception(msg)
 
     def initActivity(self, name, typen, platform):
         """
@@ -212,14 +213,14 @@ class Recorder(ProvenanceRecorder):
 
     def recordEnvironment(self):
         """Record the software environment of the pipeline."""
-        
+
         setupList = eups.Eups().listProducts(setup=True)
         # self._realRecordEnvironment(self._rundb, setupList)
         self._realRecordEnvironment(self._globalDb, setupList)
 
     def _realRecordEnvironment(self, db, setupList):
         db.startTransaction()
-        
+
         id = _offsetToActivityId(self._roffset, self._aoffset) + 1
         for product in setupList:
             db.setTableForInsert("prv_SoftwarePackage")
@@ -231,7 +232,7 @@ class Recorder(ProvenanceRecorder):
             db.setColumnInt64("packageId", id)
             db.setColumnString("version", product.version)
             db.setColumnString("directory", product.dir)
-            db.insertRow() 
+            db.insertRow()
 
             id += 1
 
@@ -252,8 +253,8 @@ class Recorder(ProvenanceRecorder):
         p = Policy.createPolicy(policyFile, False)
         for key in p.paramNames():
             type = p.getTypeName(key)
-            val = p.str(key) # works for arrays, too
-            val = re.sub(r'\0', r'', val) # extra nulls get included
+            val = p.str(key)  # works for arrays, too
+            val = re.sub(r'\0', r'', val)  # extra nulls get included
             # self._realRecordPolicyContents(self._rundb, key, type, val)
             self._realRecordPolicyContents(self._globalDb, key, type, val)
 
@@ -269,7 +270,7 @@ class Recorder(ProvenanceRecorder):
         db.setColumnString("pathname", file)
         db.setColumnString("hashValue", md5.hexdigest())
         db.setColumnInt64("modifiedDate",
-                DateTime(os.stat(file)[8] * 1000000000L, DateTime.UTC).nsecs())
+                          DateTime(os.stat(file)[8] * 1000000000, DateTime.UTC).nsecs())
         db.insertRow()
 
         db.endTransaction()
